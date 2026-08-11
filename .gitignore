@@ -1,0 +1,10 @@
+.DS_Store
+.env
+*.bak
+*.log
+__pycache__/
+*.py[cod]
+
+# Generated production configuration and local backup staging
+skills/freedocs/assets/freedocs-stack/nginx/freedocs.conf
+skills/freedocs/assets/freedocs-stack/runtime/

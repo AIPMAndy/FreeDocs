@@ -1,0 +1,21 @@
+issuer: '{{ getenv "DEX_ISSUER_URL" }}'
+storage:
+  type: sqlite3
+  config:
+    file: /var/dex/dex.db
+web:
+  http: 0.0.0.0:5556
+oauth2:
+  skipApprovalScreen: true
+enablePasswordDB: true
+staticClients:
+  - id: '{{ getenv "OIDC_CLIENT_ID" }}'
+    name: FreeDocs
+    secret: '{{ getenv "OIDC_CLIENT_SECRET" }}'
+    redirectURIs:
+      - '{{ getenv "OUTLINE_OIDC_CALLBACK_URL" }}'
+staticPasswords:
+  - email: '{{ getenv "DEX_STATIC_EMAIL" }}'
+    hash: '{{ getenv "DEX_STATIC_PASSWORD_HASH" }}'
+    username: '{{ getenv "DEX_STATIC_USERNAME" }}'
+    userID: '{{ getenv "DEX_STATIC_USER_ID" }}'

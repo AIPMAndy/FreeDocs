@@ -1,0 +1,117 @@
+name: freedocs
+
+services:
+  outline:
+    image: ${OUTLINE_IMAGE:?OUTLINE_IMAGE is required}
+    env_file: .env
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${OUTLINE_HOST_PORT:-3100}:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio-bootstrap:
+        condition: service_completed_successfully
+      dex:
+        condition: service_started
+
+  postgres:
+    image: ${POSTGRES_IMAGE:?POSTGRES_IMAGE is required}
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?POSTGRES_USER is required}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+      POSTGRES_DB: ${POSTGRES_DB:?POSTGRES_DB is required}
+    volumes:
+      - postgres-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  redis:
+    image: ${REDIS_IMAGE:?REDIS_IMAGE is required}
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  minio:
+    image: ${MINIO_IMAGE:?MINIO_IMAGE is required}
+    restart: unless-stopped
+    command: ["server", "/data", "--console-address", ":9001"]
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:?MINIO_ROOT_USER is required}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:?MINIO_ROOT_PASSWORD is required}
+    ports:
+      - "127.0.0.1:${MINIO_API_HOST_PORT:-31900}:9000"
+      - "127.0.0.1:${MINIO_CONSOLE_HOST_PORT:-31901}:9001"
+    volumes:
+      - object-data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  minio-bootstrap:
+    image: ${MINIO_MC_IMAGE:?MINIO_MC_IMAGE is required}
+    depends_on:
+      minio:
+        condition: service_healthy
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:?MINIO_ROOT_USER is required}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:?MINIO_ROOT_PASSWORD is required}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:?AWS_ACCESS_KEY_ID is required}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:?AWS_SECRET_ACCESS_KEY is required}
+      AWS_S3_UPLOAD_BUCKET_NAME: ${AWS_S3_UPLOAD_BUCKET_NAME:?AWS_S3_UPLOAD_BUCKET_NAME is required}
+    entrypoint:
+      - /bin/sh
+      - -ec
+      - |
+        mc alias set freedocs http://minio:9000 "$$MINIO_ROOT_USER" "$$MINIO_ROOT_PASSWORD"
+        mc mb --ignore-existing "freedocs/$$AWS_S3_UPLOAD_BUCKET_NAME"
+        mc version enable "freedocs/$$AWS_S3_UPLOAD_BUCKET_NAME"
+        mc anonymous set none "freedocs/$$AWS_S3_UPLOAD_BUCKET_NAME"
+        mc admin user add freedocs "$$AWS_ACCESS_KEY_ID" "$$AWS_SECRET_ACCESS_KEY"
+        mc admin policy create freedocs outline-rw /policies/outline-rw.json
+        mc admin policy attach freedocs outline-rw --user "$$AWS_ACCESS_KEY_ID"
+    volumes:
+      - ./minio/outline-rw.json:/policies/outline-rw.json:ro
+    restart: "no"
+
+  dex:
+    image: ${DEX_IMAGE:?DEX_IMAGE is required}
+    restart: unless-stopped
+    env_file: .env
+    command: ["dex", "serve", "/etc/dex/config.yaml"]
+    ports:
+      - "127.0.0.1:${DEX_HOST_PORT:-5556}:5556"
+    volumes:
+      - dex-data:/var/dex
+      - ./dex/config.yaml:/etc/dex/config.yaml:ro
+
+  mc:
+    image: ${MINIO_MC_IMAGE:?MINIO_MC_IMAGE is required}
+    profiles: ["tools"]
+    environment:
+      MC_HOST_freedocs: http://${AWS_ACCESS_KEY_ID:?AWS_ACCESS_KEY_ID is required}:${AWS_SECRET_ACCESS_KEY:?AWS_SECRET_ACCESS_KEY is required}@minio:9000
+    volumes:
+      - ./runtime:/runtime
+    depends_on:
+      minio:
+        condition: service_healthy
+
+volumes:
+  postgres-data:
+  redis-data:
+  object-data:
+  dex-data:

@@ -1,0 +1,4 @@
+interface:
+  display_name: "FreeDocs"
+  short_description: "安全部署、迁移并验收一套完整的自托管 Outline 知识库"
+  default_prompt: "Use $freedocs to audit my server and build a self-controlled Outline knowledge base with verified migration, sharing, backup, and restore."
