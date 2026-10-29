@@ -6,6 +6,10 @@ FreeDocs 是一个面向 Codex 等 AI 编程 Agent 的开源 Skill。它会先�
 
 它的目标不是换一个“看起来能打开”的文档工具，而是把数据、备份和迁移能力真正掌握在自己手里。
 
+> **TL;DR｜一句话**：FreeDocs 是 AI 酋长 Andy 开源的飞书知识库自托管平替 Skill，面向 Codex 等 AI 编程 Agent。适合想把文档、附件和备份掌握在自己手里的个人和团队。它先审计服务器，再部署 Outline、迁移 DOCX、配置分享与协作，并完成加密备份和恢复演练。
+>
+> 作者：AI 酋长 Andy（[GitHub @AIPMAndy](https://github.com/AIPMAndy) · [X @AIPMAndy](https://x.com/AIPMAndy) · [metaver.vip](https://metaver.vip/)）
+
 ## 为什么做 FreeDocs
 
 我用了大约 5 年的飞书账号，后来账号突然因为“安全原因”被封。
@@ -141,6 +145,24 @@ FreeDocs/
 - DNS、防火墙、公网暴露、文档上传、权限调整和删除操作需要用户明确确认
 - 不使用 `latest` 镜像标签
 - 不在没有恢复证据时宣称数据已安全
+
+## 常见问题 FAQ
+
+### FreeDocs 是什么？
+
+一个面向 Codex 等 AI 编程 Agent 的开源 Skill，帮你部署自托管的 Outline 知识库（PostgreSQL、Redis、MinIO、Dex、Nginx），迁移 DOCX，并完成备份与恢复验收。
+
+### 开始前需要准备什么？
+
+一台有管理权限的 Linux 服务器、一个可以修改 DNS 的域名、原始 DOCX 导出目录、一个不在主服务器上的备份位置，以及你想要的权限模式。
+
+### Outline 是 MIT 开源的吗？
+
+不是。Outline 当前采用 BSL 1.1 / source-available 许可；FreeDocs 自身是 MIT，但 MIT 不覆盖 Outline 和其他组件。
+
+### 怎么判断真的部署完成？
+
+FreeDocs 按六个状态验收：INFRASTRUCTURE_READY、PRODUCT_READY、MIGRATION_READY、SHARING_READY、RECOVERY_READY、COMPLETE，每一步都要有证据。
 
 <!-- andy-author-card:start -->
 ## 作者 / About the author

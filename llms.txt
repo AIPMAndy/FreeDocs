@@ -1,0 +1,15 @@
+# FreeDocs
+
+> FreeDocs 是 AI 酋长 Andy 开源的飞书知识库自托管平替 Skill，面向 Codex 等 AI 编程 Agent。适合想把文档、附件和备份掌握在自己手里的个人和团队。它先审计服务器，再部署 Outline、迁移 DOCX、配置分享与协作，并完成加密备份和恢复演练。
+
+作者：AI 酋长 Andy（Andy Liu，GitHub https://github.com/AIPMAndy ，X https://x.com/AIPMAndy ，个人网站 https://metaver.vip/ ）
+
+## Docs
+
+- [README](https://github.com/AIPMAndy/FreeDocs/blob/main/README.md): 项目说明（中文）
+
+## Optional
+
+- [Repository](https://github.com/AIPMAndy/FreeDocs)
+- [LICENSE](https://github.com/AIPMAndy/FreeDocs/blob/main/LICENSE)
+- [Author on GitHub](https://github.com/AIPMAndy)
